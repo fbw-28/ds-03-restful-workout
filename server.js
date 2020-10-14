@@ -1,6 +1,12 @@
 const express = require("express");
 const app = express();
 
+app.listen(5000, () => {
+  console.log("Example app listening on port 5000!");
+});
+
+app.use(express.json());
+
 let fruits = [
   { id: "1", name: "Banana", color: "yellow" },
   { id: "2", name: "Cherry", color: "red" },
@@ -19,12 +25,27 @@ app.get("/fruits/:id", (req, res) => {
   res.json(fruit);
 });
 
-app.post("/fruits");
-
-app.listen(5000, () => {
-  console.log("Example app listening on port 5000!");
+app.post("/fruits", (req, res) => {
+  if (!req.body.name) {
+    return res.send({ error: "Please provide a name field!" });
+  }
+  let newFruit = { id: (fruits.length + 1).toString(), ...req.body };
+  fruits.push(newFruit);
+  res.send(newFruit);
 });
 
-// app.use(express.json());
+app.patch("/fruits/:id", (req, res) => {
+  const { id } = req.params;
+  let fruit = fruits.find((fruit) => fruit.id == id);
+  Object.assign(fruit, { ...req.body });
+  res.send(fruit);
+});
+
+app.delete("/fruits/:id", (req, res) => {
+  const { id } = req.params;
+  let fruit = fruits.find((fruit) => fruit.id == id);
+  fruits = fruits.filter((fruit) => fruit.id != id);
+  res.send(fruit);
+});
 
 //Run app, then load http://localhost:5000 in a browser to see the output.

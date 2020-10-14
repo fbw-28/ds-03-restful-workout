@@ -18,6 +18,9 @@ app.get("/fruits/:id", (req, res) => {
   let fruit = fruits.find((fruit) => fruit.id == id);
   res.json(fruit);
 });
+
+app.post("/fruits");
+
 app.listen(5000, () => {
   console.log("Example app listening on port 5000!");
 });

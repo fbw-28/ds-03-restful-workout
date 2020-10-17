@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const morgan = require("morgan");
 
 let fruits = [
   { id: "1", name: "Banana", color: "yellow" },
@@ -9,19 +10,51 @@ let fruits = [
   { id: "5", name: "Orange", color: "orange" },
 ];
 
+app.use(morgan());
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("<h1>Welcome to our API</h1>");
+});
 
 app.get("/fruits", (req, res) => {
   res.json(fruits);
 });
 
-app.get("/fruits/:id", (req, res) => {
+// Bonus 1
+
+const getFruits = (req, res, next) => {
+  const { id } = req.params;
+  if (id === "plain") {
+    const output = fruits.map((item) => item.name);
+    res.send(output);
+  } else {
+    next();
+  }
+}
+
+// Bonus 2
+
+const getColors = (req, res, next) => {
+  const { id } = req.params;
+  if (id === "colors") {
+    let output = fruits.map((item) => item.color);
+    output = output.filter(
+      (item) => output.indexOf(item) === output.lastIndexOf(item)
+    );
+    res.send(output);
+  } else {
+    next();
+  }
+};
+
+app.get("/fruits/:id",getFruits, getColors, (req, res) => {
   const { id } = req.params;
   res.json(fruits.find((item) => item.id === id));
 });
 
 app.post("/fruits", (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   const { name, color } = req.body;
   if (name && color) {
     let newId = Date.now().toString();
@@ -53,7 +86,11 @@ app.patch("/fruits/:id", (req, res) => {
 app.delete("/fruits/:id", (req, res) => {
   const { id } = req.params;
   fruits = fruits.filter((item) => item.id !== id);
-  res.json(fruits)
+  res.json(fruits);
+});
+
+app.use((req, res) => {
+  res.status(404).json({ message: "not found" });
 });
 
 app.listen(5000, () => {
